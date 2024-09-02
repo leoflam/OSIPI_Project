@@ -1,0 +1,39 @@
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+header {
+    height: 120px;
+    background-color: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    background-color: rgb(221, 221, 221);
+}
+main {
+    height: calc(100vh - 120px);
+    padding: 20px;
+}
+.up-bar{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    border: 1px solid black;
+    padding: 10px 40px;
+}
+.card-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    padding: 20px 0 20px 0;
+    overflow-y: auto;
+}
+.card {
+    flex: 1 1 calc(33.333% - 40px);
+    box-sizing: border-box;
+}
