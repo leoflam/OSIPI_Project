@@ -1,0 +1,62 @@
+Sembra che ci siano ancora problemi con la tua richiesta. Dall'immagine, vedo che stai ricevendo un errore **401 (Unauthorized)**. Questo significa che il server richiede un'autenticazione che non è stata fornita nella richiesta.
+
+Ecco alcune cose che puoi provare:
+
+1. **Aggiungere le Credenziali**: Se il server richiede autenticazione, dovrai aggiungere le credenziali alla tua richiesta fetch. Ecco un esempio di come farlo:
+
+    ```javascript
+    function fetchData() {
+        const url = 'https://glosipi-web.man.aws.takeda.io/piwebapi/dataservers/F1DS03F4Hfeqh0G3eDN9d3ldEQV1VTVkdBUElBUkNQMDAx/points?nameFilter=RI*CP*BATCH*';
+
+        fetch(url, {
+            method: 'GET',
+            headers: {
+                'Authorization': 'Basic ' + btoa('username:password') // Sostituisci 'username' e 'password' con le tue credenziali
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log(data);
+        })
+        .catch(error => {
+            console.error('There has been a problem with your fetch operation:', error);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const countdownElements = document.querySelectorAll('#countdown span');
+        const progressBarElements = document.querySelectorAll('#progress-bar');
+
+        countdownElements.forEach((element, index) => {
+            let countdown = 30;
+            const maxCountdown = countdown; // Salva il valore massimo del countdown
+            const interval = setInterval(() => {
+                countdown--;
+                element.textContent = countdown;
+                progressBarElements[index].style.width = `${((maxCountdown - countdown) / maxCountdown) * 100}%`;
+                if (countdown <= 0) {
+                    clearInterval(interval);
+                }
+            }, 1000);
+        });
+
+        // Chiamata della funzione fetchData
+        fetchData();
+    });
+    ```
+
+2. **Verificare le Credenziali**: Assicurati che le credenziali che stai usando siano corrette e abbiano i permessi necessari per accedere alla risorsa.
+
+3. **Controllare le Impostazioni del Server**: Se hai accesso al server, verifica che le impostazioni di autenticazione siano configurate correttamente.
+
+Prova ad aggiungere le credenziali alla tua richiesta e fammi sapere se risolve il problema! 😊
+
+Source: Conversation with Copilot, 9/2/2024
+(1) https://community.brave.com/t/epic-games-store-login-captcha-fails/483299. https://community.brave.com/t/epic-games-store-login-captcha-fails/483299.
+(2) https://learn.microsoft.com/en-us/answers/questions/496182/azure-pricing-calculator-not.... https://learn.microsoft.com/en-us/answers/questions/496182/azure-pricing-calculator-not-working.
+(3) undefined. https://glosipi-web.man.
