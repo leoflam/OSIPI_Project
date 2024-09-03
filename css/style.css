@@ -17,6 +17,7 @@ header {
 main {
     height: calc(100vh - 120px);
     padding: 20px;
+    overflow: auto;
 }
 .up-bar{
     display: flex;

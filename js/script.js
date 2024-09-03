@@ -2,7 +2,13 @@ document.addEventListener('DOMContentLoaded', function() {
     const machines = [
         { name: 'RI_N_0677_CP01F%BATCH', value: "", timeStamp: "2024-09-03T09:31:15Z", avgTime: "5400" },
         { name: 'RI_N_0677_CP02F%BATCH', value: 'FP012_030924_1332', timeStamp: "2024-09-03T11:32:52Z", avgTime: "3600" },
-        { name: 'RI_N_0677_CP03F%BATCH', value: 'S16_030924_1458', timeStamp: "2024-09-03T12:58:01Z", avgTime: "1800" }
+        { name: 'RI_N_0677_CP03F%BATCH', value: 'S16_030924_1458', timeStamp: "2024-09-03T12:58:01Z", avgTime: "1800" },
+        { name: 'RI_N_0677_CP01F%BATCH', value: "", timeStamp: "2024-09-03T09:31:15Z", avgTime: "5400" },
+        { name: 'RI_N_0677_CP02F%BATCH', value: 'FP012_030924_1332', timeStamp: "2024-09-03T11:32:52Z", avgTime: "3600" },
+        { name: 'RI_N_0677_CP03F%BATCH', value: 'S16_030924_1458', timeStamp: "2024-09-03T12:58:01Z", avgTime: "1800" },
+        { name: 'RI_N_0677_CP01F%BATCH', value: "", timeStamp: "2024-09-03T09:31:15Z", avgTime: "5400" },
+        { name: 'RI_N_0677_CP02F%BATCH', value: 'FP012_030924_1332', timeStamp: "2024-09-03T11:32:52Z", avgTime: "3600" },
+        { name: 'RI_N_0677_CP03F%BATCH', value: 'S16_030924_1458', timeStamp: "2024-09-03T12:58:01Z", avgTime: "1800" },
     ];
 
     const cardContainer = document.getElementById("card-container");
