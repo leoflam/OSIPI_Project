@@ -1,14 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
     const machines = [
         { name: 'RI_N_0677_CP01F%BATCH', value: "", timeStamp: "2024-09-03T09:31:15Z", avgTime: "5400" },
-        { name: 'RI_N_0677_CP02F%BATCH', value: 'FP012_030924_1332', timeStamp: "2024-09-03T11:32:52Z", avgTime: "3600" },
-        { name: 'RI_N_0677_CP03F%BATCH', value: 'S16_030924_1458', timeStamp: "2024-09-03T12:58:01Z", avgTime: "1800" },
-        { name: 'RI_N_0677_CP01F%BATCH', value: "", timeStamp: "2024-09-03T09:31:15Z", avgTime: "5400" },
-        { name: 'RI_N_0677_CP02F%BATCH', value: 'FP012_030924_1332', timeStamp: "2024-09-03T11:32:52Z", avgTime: "3600" },
-        { name: 'RI_N_0677_CP03F%BATCH', value: 'S16_030924_1458', timeStamp: "2024-09-03T12:58:01Z", avgTime: "1800" },
-        { name: 'RI_N_0677_CP01F%BATCH', value: "", timeStamp: "2024-09-03T09:31:15Z", avgTime: "5400" },
-        { name: 'RI_N_0677_CP02F%BATCH', value: 'FP012_030924_1332', timeStamp: "2024-09-03T11:32:52Z", avgTime: "3600" },
-        { name: 'RI_N_0677_CP03F%BATCH', value: 'S16_030924_1458', timeStamp: "2024-09-03T12:58:01Z", avgTime: "1800" },
+        { name: 'RI_N_0677_CP02F%BATCH', value: 'FP012_030924_1332', timeStamp: "2024-09-03T15:40:52Z", avgTime: "3600" },
+        { name: 'RI_N_0677_CP03F%BATCH', value: 'S16_030924_1458', timeStamp: "2024-09-03T14:42:48Z", avgTime: "1800" },
+        // Altri oggetti macchina...
     ];
 
     const cardContainer = document.getElementById("card-container");
@@ -20,24 +15,29 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function generateCards(machines) {
         return machines.map((machine, index) => {
-            // Extract title from name
+            // Estrai il titolo dal nome
             const title = machine.name.split('_').slice(3, 4)[0].split('%')[0];
 
-            // Format date and time from timeStamp
+            // Estrai data e ora da timeStamp
             const date = new Date(machine.timeStamp);
             const formattedDate = date.toLocaleDateString('it-IT');
-            const hours = date.getHours();
-            const minutes = date.getMinutes().toString().padStart(2, '0');
-            const period = hours >= 12 ? 'PM' : 'AM';
-            const formattedTime = `${hours % 12 || 12}:${minutes} ${period}`;
+            const timeString = machine.timeStamp.split('T')[1].split('Z')[0];
+            const [hours, minutes] = timeString.split(':');
 
-            // estrarre value
+            // Estrai value
             const equipment = machine.value.split('_')[0];
 
-            // Determine card background class
+            // Determina la classe di sfondo della card
             const cardBackgroundClass = toggleCardBackground(machine);
 
-            // Create card
+            // Calcola la data e l'ora di fine previste
+            const endDate = new Date(date.getTime() + machine.avgTime * 1000);
+            const formattedEndDate = endDate.toLocaleDateString('it-IT');
+            const endHours = endDate.getHours().toString().padStart(2, '0');
+            const endMinutes = endDate.getMinutes().toString().padStart(2, '0');
+            const formattedEndTime = `${endHours}:${endMinutes}`;
+
+            // Crea la card
             return `
                 <div class="card ${cardBackgroundClass}" id="card-${index}">
                     <div class="card-header">
@@ -54,8 +54,10 @@ document.addEventListener('DOMContentLoaded', function() {
                         </div>
                         <div class="process">Equipment: ${equipment}</div>
                         <div>Data inizio: ${formattedDate}</div>
-                        <div>Ora di inizio: ${formattedTime}</div>
-                        <p id="countdown-${index}" class="card-text">Tempo rimanente: <span>10</span> seconds</p>
+                        <div>Ora di inizio: ${hours}:${minutes}</div>
+                        <div>Data fine prevista: ${formattedEndDate}</div>
+                        <div>Ora fine prevista: ${formattedEndTime}</div>
+                        <p id="countdown-${index}" class="card-text">Tempo rimanente: <span>0</span> secondi</p>
                         <h6> Tag: ${machine.name}</h6>
                         <button class="btn btn-danger mt-2" onclick="showDetails()">Dettagli <span><i class="fa-solid fa-info m-1"></i></span></button>
                     </div>
@@ -67,18 +69,29 @@ document.addEventListener('DOMContentLoaded', function() {
     cardContainer.innerHTML = generateCards(machines);
 
     machines.forEach((machine, index) => {
-        let countdown = 60;
-        const maxCountdown = countdown; // Save the maximum countdown value
-        const interval = setInterval(() => {
-            countdown--;
-            document.querySelector(`#countdown-${index} span`).textContent = countdown;
-            const percentage = ((maxCountdown - countdown) / maxCountdown) * 100;
-            document.querySelector(`#progress-bar-${index}`).style.width = `${percentage}%`;
-            document.querySelectorAll('.percentage')[index].textContent = `${Math.round(percentage)}%`;
-            if (countdown <= 0) {
-                clearInterval(interval);
-            }
-        }, 1000);
+        if (machine.value !== "" && machine.value !== null) {
+            const startDate = new Date(machine.timeStamp);
+            const avgTime = parseInt(machine.avgTime, 10) * 1000;
+            const endDate = new Date(startDate.getTime() + avgTime);
+            const now = new Date();
+
+            let countdown = Math.max(0, Math.floor((endDate - now) / 1000));
+            const maxCountdown = countdown;
+
+            const interval = setInterval(() => {
+                countdown--;
+                document.querySelector(`#countdown-${index} span`).textContent = countdown;
+                const percentage = ((maxCountdown - countdown) / maxCountdown) * 100;
+                document.querySelector(`#progress-bar-${index}`).style.width = `${percentage}%`;
+                document.querySelectorAll('.percentage')[index].textContent = `${Math.round(percentage)}%`;
+                if (countdown <= 0) {
+                    clearInterval(interval);
+                    document.querySelector(`#countdown-${index} span`).textContent = '0';
+                    document.querySelector(`#progress-bar-${index}`).style.width = '100%';
+                    document.querySelectorAll('.percentage')[index].textContent = '100%';
+                }
+            }, 1000);
+        }
     });
 
     function showDetails() {
@@ -94,31 +107,3 @@ document.addEventListener('DOMContentLoaded', function() {
     window.showDetails = showDetails;
     window.goBack = goBack;
 });
-
-    // // Funzione per fare la chiamata API
-    // function fetchData() {
-    //     const url = 'https://glosipi-web.man.aws.takeda.io/piwebapi/dataservers/F1DS03F4Hfeqh0G3eDN9d3ldEQV1VTVkdBUElBUkNQMDAx/points?nameFilter=RI*CP*BATCH*';
-    
-    //     fetch(url, {
-    //         method: 'GET',
-    //         credentials: 'include', // Include le credenziali di Windows
-    //         mode: 'no-cors' // Assicurati che il server supporti le richieste CORS
-    //     })
-    //     .then(response => {
-    //         if (!response.ok) {
-    //             throw new Error('Network response was not ok ' + response.statusText);
-    //         }
-    //         return response.json();
-    //     })
-    //     .then(data => {
-    //         console.log(data);
-    //     })
-    //     .catch(error => {
-    //         console.error('There has been a problem with your fetch operation:', error);
-    //     });
-    // }
-    
-
-    // // Chiamata della funzione fetchData
-    // fetchData();
-// });
