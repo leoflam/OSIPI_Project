@@ -37,3 +37,17 @@ main {
     flex: 1 1 calc(33.333% - 40px);
     box-sizing: border-box;
 }
+.card-header{
+    display: flex;
+    align-items: center;
+    background-color: rgb(125, 189, 125) !important;
+}
+.card-header .card-title{
+   text-transform: uppercase;
+}
+.card-body{
+    background-color: rgb(151, 192, 151);
+}
+.process{
+    font-weight: bold;
+}
