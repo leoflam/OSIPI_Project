@@ -71,7 +71,7 @@ function createCard(machine, index) {
                 </div>
                 ${createIntermediateProgressBars(index)}
                 <p id="countdown-${index}" class="card-text">Tempo rimanente: <span>${remainingHours}h ${remainingMinutes}m</span></p>
-                <h6> Tag: ${machine.name}</h6>
+                
                 <button class="btn btn-danger mt-2" onclick="showDetails()">Dettagli <span><i class="fa-solid fa-info m-1"></i></span></button>
             </div>
         </div>
