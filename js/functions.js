@@ -1,3 +1,6 @@
+const cardContainer = document.getElementById("card-container");
+const cardContainerDetail = document.getElementById('card-container-detail');
+
 let formattedDate, startHours, startMinutes, date;
 
 function toggleCardBackground(machine) {
