@@ -10,8 +10,18 @@ function toggleCardBackground(machine) {
 function extractInitialDateTime(machine) {
     date = new Date(machine.timeStamp);
     formattedDate = date.toLocaleDateString('it-IT');
-    const timeString = machine.timeStamp.split('T')[1].split('Z')[0];
-    [startHours, startMinutes] = timeString.split(':');
+    startHours = date.getHours();
+    startMinutes = date.getMinutes();
+
+    // return {
+    //     formattedDate,
+    //     startHours,
+    //     startMinutes
+    // };
+
+    //pensando che lavorassero sullo stesso fuso orario, invece il database è in fuso orario utc
+    // const timeString = machine.timeStamp.split('T')[1].split('Z')[0];
+    // [startHours, startMinutes] = timeString.split(':');
 }
 
 function calculateEndDate(machine) {
@@ -26,8 +36,8 @@ function formatEndDate(endDate) {
 }
 
 function calculateTimeRemaining(startDate, endDate) {
-    const totalMilliseconds = endDate - startDate;
-    const totalSeconds = Math.floor(totalMilliseconds / 1000);
+    const totalMilliseconds = endDate.getTime() - startDate.getTime();
+    const totalSeconds = Math.max(0, Math.floor(totalMilliseconds / 1000)); // Imposta a zero se negativo
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
     const seconds = totalSeconds % 60;
@@ -41,7 +51,7 @@ function createCard(machine, index) {
     const cardBackgroundClass = toggleCardBackground(machine);
     const endDate = calculateEndDate(machine);
     const { formattedEndDate, formattedEndTime } = formatEndDate(endDate);
-    const { hours: remainingHours, minutes: remainingMinutes } = calculateTimeRemaining(new Date(), endDate);
+    const { hours: remainingHours, minutes: remainingMinutes, seconds:remainingSeconds } = calculateTimeRemaining(new Date(), endDate);
 
     return `
         <div class="card ${cardBackgroundClass}" id="card-${index}">
@@ -53,7 +63,7 @@ function createCard(machine, index) {
                     <div class="col">
                         <div class="progress">
                             <div id="progress-bar-${index}" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                            <span id="percentage-${index}"></span>
+                            <span class="percentage" id="percentage-${index}"></span>
                         </div>
                     </div>
                 </div>
@@ -73,7 +83,7 @@ function createCard(machine, index) {
                     </div>
                 </div>
                 ${createIntermediateProgressBars(index)}
-                <p id="countdown-${index}" class="card-text">Tempo rimanente: <span>${remainingHours}h ${remainingMinutes}m</span></p>
+                <div id="countdown-${index}" class="card-text">Tempo rimanente: <span>${remainingHours}h ${remainingMinutes}m ${remainingSeconds}s</span></div>
                 
                 <button class="btn btn-danger mt-2" onclick="showDetails()">Dettagli <span><i class="fa-solid fa-info m-1"></i></span></button>
             </div>
@@ -96,42 +106,80 @@ function createIntermediateProgressBars(index) {
     `).join('');
 }
 
-function updateTimeRemaining(machine, index) {
-    const startDate = new Date(machine.timeStamp);
-    const avgTime = parseInt(machine.avgTime, 10) * 1000;
-    const endDate = new Date(startDate.getTime() + avgTime);
-    const now = new Date();
-
-    let countdown = Math.max(0, Math.floor((endDate - now) / 1000));
-    const interval = setInterval(() => {
-        countdown--;
-        const remainingTime = calculateTimeRemaining(now, endDate);
-        document.querySelector(`#countdown-${index} span`).textContent = `${remainingTime.hours}h ${remainingTime.minutes}m ${remainingTime.seconds}s`;
-        if (countdown <= 0) {
-            clearInterval(interval);
-            document.querySelector(`#countdown-${index} span`).textContent = '0h 0m 0s';
-        }
-    }, 1000);
-}
-
 function updateProgressBar(machine, index) {
-    const startDate = new Date(machine.timeStamp);
-    const avgTime = parseInt(machine.avgTime, 10) * 1000;
-    const endDate = new Date(startDate.getTime() + avgTime);
+    // Utilizza extractInitialDateTime per ottenere la data di inizio
+    extractInitialDateTime(machine);
+    const startDate = date;
+    if (isNaN(startDate)) {
+        console.error("Invalid start date");
+        return;
+    }
+
+    // Utilizza calculateEndDate per ottenere la data di fine
+    const endDate = calculateEndDate(machine);
+
+    console.log(`Start Date: ${startDate}`);
+    console.log(`End Date: ${endDate}`);
+    console.log(`Current Date: ${new Date()}`);
+
+    if (startDate > new Date()) {
+        console.error("Start date is in the future");
+        console.log(`Current Date: ${new Date()}`);
+        console.log(`Start Date: ${startDate}`);
+        return;
+    }
 
     const interval = setInterval(() => {
         const now = new Date();
         const totalMilliseconds = endDate - startDate;
         const elapsedMilliseconds = now - startDate;
+
+        console.log(`Now: ${now}`);
+        console.log(`Total Milliseconds: ${totalMilliseconds}`);
+        console.log(`Elapsed Milliseconds: ${elapsedMilliseconds}`);
+
+        if (elapsedMilliseconds < 0) {
+            console.error("Elapsed time is negative");
+            clearInterval(interval);
+            return;
+        }
+
         const percentage = Math.min(100, (elapsedMilliseconds / totalMilliseconds) * 100);
 
-        document.querySelector(`#progress-bar-${index}`).style.width = `${percentage}%`;
-        document.querySelector(`#percentage-${index}`).textContent = `${Math.round(percentage)}%`;
+        console.log(`Percentage: ${percentage}%`);
+
+        const progressBar = document.querySelector(`#progress-bar-${index}`);
+        const percentageText = document.querySelector(`#percentage-${index}`);
+
+        if (progressBar && percentageText) {
+            progressBar.style.width = `${percentage}%`;
+            percentageText.textContent = `${Math.round(percentage)}%`;
+        } else {
+            console.error(`Progress bar or percentage text not found for index ${index}`);
+            clearInterval(interval);
+            return;
+        }
 
         if (percentage >= 100) {
             clearInterval(interval);
-            document.querySelector(`#progress-bar-${index}`).style.width = '100%';
-            document.querySelector(`#percentage-${index}`).textContent = '100%';
+            progressBar.style.width = '100%';
+            percentageText.textContent = '100%';
+        }
+    }, 1000);
+}
+
+function updateTimeRemaining(machine, index) {
+    const startDate = new Date(machine.timeStamp);
+    const endDate = new Date(startDate.getTime() + parseInt(machine.avgTime, 10) * 1000);
+
+    const interval = setInterval(() => {
+        const now = new Date();
+        const { hours, minutes, seconds } = calculateTimeRemaining(now, endDate);
+
+        document.querySelector(`#countdown-${index} span`).textContent = `${hours}h ${minutes}m ${seconds}s`;
+
+        if (hours === 0 && minutes === 0 && seconds === 0) {
+            clearInterval(interval);
         }
     }, 1000);
 }
@@ -156,3 +204,9 @@ function goBack() {
     cardContainer.style.display = 'flex';
     cardContainerDetail.style.display = 'none';
 }
+
+document.addEventListener('DOMContentLoaded', function() {
+    const cardContainer = document.getElementById("card-container");
+
+    cardContainer.innerHTML = generateCards(machines);
+});
