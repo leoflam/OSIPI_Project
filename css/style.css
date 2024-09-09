@@ -49,10 +49,6 @@ main {
 .card-body{
     
 }
-.process{
-    font-weight: bold;
-}
-
 .progress {
     position: relative;
     height: 20px !important; /* Altezza della barra di progresso */
@@ -82,4 +78,7 @@ main {
 }
 .lf-bg-green{
     background-color: rgb(151, 192, 151) !important;
+}
+.card-body .button{
+    display: none;
 }
