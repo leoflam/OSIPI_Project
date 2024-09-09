@@ -49,6 +49,7 @@ main {
 .card-body{
     
 }
+
 .progress {
     position: relative;
     height: 20px !important; /* Altezza della barra di progresso */
