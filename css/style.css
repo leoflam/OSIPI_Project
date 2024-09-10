@@ -45,8 +45,12 @@ main {
 .card-header .card-title{
    text-transform: uppercase;
 }
-.card-body{
-    
+.card-text{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    /* font-size: 2rem; */
 }
 
 .progress {

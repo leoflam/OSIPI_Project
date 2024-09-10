@@ -136,7 +136,7 @@ function createCard(machine, index) {
                     </div>
                 </div>
                 <div class="process"><span class="fw-bold">Equipment:</span> ${equipment}</div>
-                <div class="card-text mb-2"><span class="fw-bold">Tempo rimanente lavaggio CIP: </span><span id="countdown-${index}">${remainingHours}h ${remainingMinutes}m ${remainingSeconds}s</span></div>
+                <div class="card-text mb-2"><span class="fs-4" >Tempo rimanente lavaggio CIP: </span><span class="fw-bold fs-1" id="countdown-${index}">${remainingHours}h ${remainingMinutes}m ${remainingSeconds}s</span></div>
                 <div class="row row-cols-2 mb-2">
                     <div class="col">
                          <div><span class="fw-bold">Data inizio:</span> ${formattedDate}</div>
@@ -152,18 +152,6 @@ function createCard(machine, index) {
                     </div>
                 </div>
                 
-                <div class="row row-cols-2">
-                    
-                    <div class="col">RO:</div> 
-                    <div><span id="step-RO-${index}">N/A</span></div>
-                    <div class="col">SOL BASICA:</div> 
-                    <div><span id="step-SOL-BASICA-${index}">N/A</span></div>
-                    <div class="col">WFI:</div> 
-                    <div><span id="step-WFI-${index}">N/A</span></div>
-                    <div class="col">RO2:</div> 
-                    <div><span id="step-RO2-${index}">N/A</span></div>
-                </div>
-                
 
 
                 <div class="my-2">
@@ -176,82 +164,87 @@ function createCard(machine, index) {
         </div>
     `;
 }
-// ${createIntermediateProgressBars(index)} da mettere in html 
-// function createIntermediateProgressBars(index) {
-//     const phases = ['RO', 'SOL BASICA', 'WFI', 'RO2'];
-//     return phases.map((phase, phaseIndex) => `
-//         <div class="row">
-//             <div class="row row-cols-2">
-//                 <div class="col">${phase}:</div> 
-//                 <div class="progress">
-//                     <div id="progress-bar-${phase.toLowerCase()}-${index}" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-//                     <span id="percentage-${phase.toLowerCase()}-${index}"></span>
-//                 </div>
-//             </div>
-//         </div>
-//     `).join('');
-// }
 
 function updateProgressBar(machine, index) {
-    // Utilizza extractInitialDateTime per ottenere la data di inizio
-    extractInitialDateTime(machine);
-    const startDate = date;
-    if (isNaN(startDate)) {
-        console.error("Invalid start date");
-        return;
-    }
+    const status = setStatus(machine); // Ottieni lo stato della macchina
+    let percentage = 0;
 
-    // Utilizza calculateEndDate per ottenere la data di fine
-    const endDate = calculateEndDate(machine);
-
-    console.log(`Start Date: ${startDate}`);
-    console.log(`End Date: ${endDate}`);
-    console.log(`Current Date: ${new Date()}`);
-
-    if (startDate > new Date()) {
-        console.error("Start date is in the future");
-        console.log(`Current Date: ${new Date()}`);
-        console.log(`Start Date: ${startDate}`);
-        return;
-    }
-
-    const interval = setInterval(() => {
-        const now = new Date();
-        const totalMilliseconds = endDate - startDate;
-        const elapsedMilliseconds = now - startDate;
-
-        console.log(`Now: ${now}`);
-        console.log(`Total Milliseconds: ${totalMilliseconds}`);
-        console.log(`Elapsed Milliseconds: ${elapsedMilliseconds}`);
-
-        if (elapsedMilliseconds < 0) {
-            console.error("Elapsed time is negative");
-            clearInterval(interval);
+    if (status === "Disponibile" || status === "In manutenzione") {
+        percentage = 0;
+    } else {
+        // Utilizza extractInitialDateTime per ottenere la data di inizio
+        extractInitialDateTime(machine);
+        const startDate = date;
+        if (isNaN(startDate)) {
+            console.error("Invalid start date");
             return;
         }
 
-        const percentage = Math.min(100, (elapsedMilliseconds / totalMilliseconds) * 100);
+        // Utilizza calculateEndDate per ottenere la data di fine
+        const endDate = calculateEndDate(machine);
 
-        console.log(`Percentage: ${percentage}%`);
+        console.log(`Start Date: ${startDate}`);
+        console.log(`End Date: ${endDate}`);
+        console.log(`Current Date: ${new Date()}`);
 
+        if (startDate > new Date()) {
+            console.error("Start date is in the future");
+            console.log(`Current Date: ${new Date()}`);
+            console.log(`Start Date: ${startDate}`);
+            return;
+        }
+
+        const interval = setInterval(() => {
+            const now = new Date();
+            const totalMilliseconds = endDate - startDate;
+            const elapsedMilliseconds = now - startDate;
+
+            console.log(`Now: ${now}`);
+            console.log(`Total Milliseconds: ${totalMilliseconds}`);
+            console.log(`Elapsed Milliseconds: ${elapsedMilliseconds}`);
+
+            if (elapsedMilliseconds < 0) {
+                console.error("Elapsed time is negative");
+                clearInterval(interval);
+                return;
+            }
+
+            percentage = Math.min(100, (elapsedMilliseconds / totalMilliseconds) * 100);
+
+            console.log(`Percentage: ${percentage}%`);
+
+            const progressBar = document.querySelector(`#progress-bar-${index}`);
+            const percentageText = document.querySelector(`#percentage-${index}`);
+
+            if (progressBar && percentageText) {
+                progressBar.style.width = `${percentage}%`;
+                percentageText.textContent = `${Math.round(percentage)}%`;
+            } else {
+                console.error(`Progress bar or percentage text not found for index ${index}`);
+                clearInterval(interval);
+                return;
+            }
+
+            if (percentage >= 100) {
+                clearInterval(interval);
+                progressBar.style.width = '100%';
+                percentageText.textContent = '100%';
+            }
+        }, 1000);
+    }
+
+    // Imposta la percentuale a 0% se lo stato è "Disponibile" o "In manutenzione"
+    if (status === "Disponibile" || status === "In manutenzione") {
         const progressBar = document.querySelector(`#progress-bar-${index}`);
         const percentageText = document.querySelector(`#percentage-${index}`);
 
         if (progressBar && percentageText) {
-            progressBar.style.width = `${percentage}%`;
-            percentageText.textContent = `${Math.round(percentage)}%`;
+            progressBar.style.width = '0%';
+            percentageText.textContent = '0%';
         } else {
             console.error(`Progress bar or percentage text not found for index ${index}`);
-            clearInterval(interval);
-            return;
         }
-
-        if (percentage >= 100) {
-            clearInterval(interval);
-            progressBar.style.width = '100%';
-            percentageText.textContent = '100%';
-        }
-    }, 1000);
+    }
 }
 
 function updateTimeRemaining(machine, index) {
