@@ -37,51 +37,82 @@ function setCardBackground(status) {
 }
 
 
-function extractInitialDateTime(machine) {
-    date = new Date(machine.timeStamp);
-    formattedDate = date.toLocaleDateString('it-IT');
-    startHours = date.getHours();
-    startMinutes = date.getMinutes();
-
-    // return {
-    //     formattedDate,
-    //     startHours,
-    //     startMinutes
-    // };
-
-    //pensando che lavorassero sullo stesso fuso orario, invece il database è in fuso orario utc
-    // const timeString = machine.timeStamp.split('T')[1].split('Z')[0];
-    // [startHours, startMinutes] = timeString.split(':');
+function extractInitialDateTime(machine, status) {
+    if (status == "Disponibile" || status=="In manutenzione"){
+        startHours = "N/A";
+        startMinutes = "N/A";
+        date = "N/A";
+        formattedDate ="N/A";
+    } else {
+        date = new Date(machine.timeStamp);
+        formattedDate = date.toLocaleDateString('it-IT');
+        startHours = date.getHours();
+        startMinutes = date.getMinutes();
+    }
 }
 
-function calculateEndDate(machine) {
-    return new Date(date.getTime() + machine.avgTime * 1000);
+function calculateEndDate(machine, status) {
+    if (status == "Disponibile" || status=="In manutenzione"){
+        return "N/A";
+    }else{
+        const localDate = new Date(machine.timeStamp);
+        return new Date(localDate.getTime() + machine.avgTime * 1000);
+    }
+    
 }
 
-function formatEndDate(endDate) {
-    const formattedEndDate = endDate.toLocaleDateString('it-IT');
-    const endHours = endDate.getHours().toString().padStart(2, '0');
-    const endMinutes = endDate.getMinutes().toString().padStart(2, '0');
-    return { formattedEndDate, formattedEndTime: `${endHours}:${endMinutes}` };
+function formatEndDate(endDate, machine) {
+    const localDate = new Date(machine.timeStamp);
+    if(endDate == "N/A"){
+        const formattedEndDate = "N/A";
+        const endHours = "N/A";
+        const endMinutes = "N/A";
+        return { formattedEndDate, formattedEndTime: `${endHours}:${endMinutes}` };
+    }else{
+        const formattedEndDate = endDate.toLocaleDateString('it-IT');
+        const endHours = endDate.getHours().toString().padStart(2, '0');
+        const endMinutes = endDate.getMinutes().toString().padStart(2, '0');
+        return { formattedEndDate, formattedEndTime: `${endHours}:${endMinutes}` };
+    }
+    
 }
 
 function calculateTimeRemaining(startDate, endDate) {
-    const totalMilliseconds = endDate.getTime() - startDate.getTime();
-    const totalSeconds = Math.max(0, Math.floor(totalMilliseconds / 1000)); // Imposta a zero se negativo
-    const hours = Math.floor(totalSeconds / 3600);
-    const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
-    return { hours, minutes, seconds };
+    if (endDate == "N/A"){
+        const hours = "N/A";
+        const minutes = "N/A";
+        const seconds = "N/A";
+        return { hours, minutes, seconds };
+    }else{
+        const totalMilliseconds = endDate.getTime() - startDate.getTime();
+        const totalSeconds = Math.max(0, Math.floor(totalMilliseconds / 1000)); // Imposta a zero se negativo
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+        return { hours, minutes, seconds };
+    }
+    
 }
+
+function setStepTime(machine){
+    if(machine.step.timeRemaining == 0){
+        return "N/A"
+    }else{
+        return machine.step.timeRemaining / 60;
+    }
+}
+
+// function selectStepId(machine)
 
 function createCard(machine, index) {
     const title = machine.name.split('_').slice(3, 4)[0].split('%')[0];
-    extractInitialDateTime(machine);
-    const equipment = machine.value.split('_')[0];
     const status = setStatus(machine);
+    extractInitialDateTime(machine, status);
+    const equipment = machine.value.split('_')[0];
+    
     const cardBackgroundClass = setCardBackground(status);
-    const endDate = calculateEndDate(machine);
-    const { formattedEndDate, formattedEndTime } = formatEndDate(endDate);
+    const endDate = calculateEndDate(machine, status);
+    const { formattedEndDate, formattedEndTime } = formatEndDate(endDate, machine);
     const { hours: remainingHours, minutes: remainingMinutes, seconds:remainingSeconds } = calculateTimeRemaining(new Date(), endDate);
     
 
@@ -124,13 +155,13 @@ function createCard(machine, index) {
                 <div class="row row-cols-2">
                     
                     <div class="col">RO:</div> 
-                    <div><span>N/A</span></div>
+                    <div><span id="step-RO-${index}">N/A</span></div>
                     <div class="col">SOL BASICA:</div> 
-                    <div><span>N/A</span></div>
+                    <div><span id="step-SOL-BASICA-${index}">N/A</span></div>
                     <div class="col">WFI:</div> 
-                    <div><span>N/A</span></div>
+                    <div><span id="step-WFI-${index}">N/A</span></div>
                     <div class="col">RO2:</div> 
-                    <div><span>N/A</span></div>
+                    <div><span id="step-RO2-${index}">N/A</span></div>
                 </div>
                 
 
