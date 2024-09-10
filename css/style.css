@@ -20,7 +20,7 @@ main {
     overflow: auto;
 }
 .up-bar{
-    display: flex;
+    display: none;
     justify-content: space-between;
     align-items: center;
     width: 100%;
@@ -39,8 +39,7 @@ main {
     box-sizing: border-box;
 }
 .card-header{
-    display: flex;
-    align-items: center;
+    
     /* background-color: rgb(125, 189, 125) !important; */
 }
 .card-header .card-title{
@@ -75,11 +74,25 @@ main {
 }
 
 .lf-bg-red{
-    background-color: rgb(223, 132, 132) !important;
+    background-color: #ffa080 !important;
 }
 .lf-bg-green{
-    background-color: rgb(151, 192, 151) !important;
+    background-color: #a5d46a !important;
 }
-.card-body .button{
+.lf-bg-yellow{
+    background-color: #ffff80 !important;
+}
+
+.card-body button{
     display: none;
+}
+
+.blinking {
+    animation: blinkingBackground 1s infinite;
+}
+
+@keyframes blinkingBackground {
+    0% { background-color: transparent !important; }
+    50% { background-color: yellow !important; }
+    100% { background-color: transparent !important; }
 }

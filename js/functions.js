@@ -3,9 +3,39 @@ const cardContainerDetail = document.getElementById('card-container-detail');
 
 let formattedDate, startHours, startMinutes, date;
 
-function toggleCardBackground(machine) {
-    return machine.value === "" ? 'lf-bg-red' : 'lf-bg-green';
+function setStatus(machine) {
+    let status;
+    if (machine.value != ""){
+        status = "Occupato";
+    }else if(machine.maintenance){
+        status = "In manutenzione";
+    }else{
+        status = "Disponibile";
+    }
+    return  status;
 }
+
+function setCardBackground(status) {
+    let bgcolor;
+   
+    switch(status){
+        case "Occupato":
+            bgcolor = "lf-bg-yellow";
+            break
+        
+        case "In manutenzione":
+            bgcolor = "lf-bg-red";
+            break
+        
+        case "Disponibile":
+            bgcolor = "lf-bg-green";
+            break
+        default:
+            break;
+    }
+    return bgcolor;
+}
+
 
 function extractInitialDateTime(machine) {
     date = new Date(machine.timeStamp);
@@ -48,18 +78,25 @@ function createCard(machine, index) {
     const title = machine.name.split('_').slice(3, 4)[0].split('%')[0];
     extractInitialDateTime(machine);
     const equipment = machine.value.split('_')[0];
-    const cardBackgroundClass = toggleCardBackground(machine);
+    const status = setStatus(machine);
+    const cardBackgroundClass = setCardBackground(status);
     const endDate = calculateEndDate(machine);
     const { formattedEndDate, formattedEndTime } = formatEndDate(endDate);
     const { hours: remainingHours, minutes: remainingMinutes, seconds:remainingSeconds } = calculateTimeRemaining(new Date(), endDate);
+    
 
     return `
         <div class="card ${cardBackgroundClass}" id="card-${index}">
             <div class="card-header">
                 <h4 class="card-title">Macchina: ${title}</h4>
+                <div class="">
+                        <span class="fw-bold">Stato:</span>
+                        <span>${status}</span>
+                </div>
             </div>
             <div class="card-body">
                 <div class="row row-cols-1 my-2">
+                    
                     <div class="col">
                         <div class="progress">
                             <div id="progress-bar-${index}" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
@@ -68,6 +105,7 @@ function createCard(machine, index) {
                     </div>
                 </div>
                 <div class="process"><span class="fw-bold">Equipment:</span> ${equipment}</div>
+                <div class="card-text mb-2"><span class="fw-bold">Tempo rimanente lavaggio CIP: </span><span id="countdown-${index}">${remainingHours}h ${remainingMinutes}m ${remainingSeconds}s</span></div>
                 <div class="row row-cols-2 mb-2">
                     <div class="col">
                          <div><span class="fw-bold">Data inizio:</span> ${formattedDate}</div>
@@ -82,29 +120,46 @@ function createCard(machine, index) {
                         <div><span class="fw-bold">Ora fine prevista:</span> ${formattedEndTime}</div>
                     </div>
                 </div>
-                ${createIntermediateProgressBars(index)}
-                <div id="countdown-${index}" class="card-text mb-2">Tempo rimanente: <span>${remainingHours}h ${remainingMinutes}m ${remainingSeconds}s</span></div>
+                
+                <div class="row row-cols-2">
+                    
+                    <div class="col">RO:</div> 
+                    <div><span>N/A</span></div>
+                    <div class="col">SOL BASICA:</div> 
+                    <div><span>N/A</span></div>
+                    <div class="col">WFI:</div> 
+                    <div><span>N/A</span></div>
+                    <div class="col">RO2:</div> 
+                    <div><span>N/A</span></div>
+                </div>
+                
+
+
+                <div class="my-2">
+                    <span class="fw-bold">Step di processo in corso:</span> 
+                    <span>N/A</span>
+                </div>
                 
                 <button class="btn btn-danger mt-2" onclick="showDetails()">Dettagli <span><i class="fa-solid fa-info m-1"></i></span></button>
             </div>
         </div>
     `;
 }
-
-function createIntermediateProgressBars(index) {
-    const phases = ['RO', 'SOL BASICA', 'WFI', 'RO2'];
-    return phases.map((phase, phaseIndex) => `
-        <div class="row">
-            <div class="row row-cols-2">
-                <div class="col">${phase}:</div> 
-                <div class="progress">
-                    <div id="progress-bar-${phase.toLowerCase()}-${index}" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
-                    <span id="percentage-${phase.toLowerCase()}-${index}"></span>
-                </div>
-            </div>
-        </div>
-    `).join('');
-}
+// ${createIntermediateProgressBars(index)} da mettere in html 
+// function createIntermediateProgressBars(index) {
+//     const phases = ['RO', 'SOL BASICA', 'WFI', 'RO2'];
+//     return phases.map((phase, phaseIndex) => `
+//         <div class="row">
+//             <div class="row row-cols-2">
+//                 <div class="col">${phase}:</div> 
+//                 <div class="progress">
+//                     <div id="progress-bar-${phase.toLowerCase()}-${index}" class="progress-bar bg-success" role="progressbar" style="width: 0%;" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+//                     <span id="percentage-${phase.toLowerCase()}-${index}"></span>
+//                 </div>
+//             </div>
+//         </div>
+//     `).join('');
+// }
 
 function updateProgressBar(machine, index) {
     // Utilizza extractInitialDateTime per ottenere la data di inizio
@@ -176,7 +231,15 @@ function updateTimeRemaining(machine, index) {
         const now = new Date();
         const { hours, minutes, seconds } = calculateTimeRemaining(now, endDate);
 
-        document.querySelector(`#countdown-${index} span`).textContent = `${hours}h ${minutes}m ${seconds}s`;
+        document.querySelector(`#countdown-${index}`).textContent = `${hours}h ${minutes}m ${seconds}s`;
+        
+        const timeRemaining = (endDate - now) / 1000;
+
+        if (timeRemaining <= 600) {
+            console.log(`Adding blinking class to card ${index}`);
+            document.querySelector(`#card-id-${index}`).classList.add('blinking');
+        }
+
 
         if (hours === 0 && minutes === 0 && seconds === 0) {
             clearInterval(interval);
