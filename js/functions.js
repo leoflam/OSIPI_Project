@@ -176,21 +176,21 @@ function updateProgressBar(machine, index) {
         extractInitialDateTime(machine);
         const startDate = date;
         if (isNaN(startDate)) {
-            console.error("Invalid start date");
+            // console.error("Invalid start date");
             return;
         }
 
         // Utilizza calculateEndDate per ottenere la data di fine
         const endDate = calculateEndDate(machine);
 
-        console.log(`Start Date: ${startDate}`);
-        console.log(`End Date: ${endDate}`);
-        console.log(`Current Date: ${new Date()}`);
+        // console.log(`Start Date: ${startDate}`);
+        // console.log(`End Date: ${endDate}`);
+        // console.log(`Current Date: ${new Date()}`);
 
         if (startDate > new Date()) {
-            console.error("Start date is in the future");
-            console.log(`Current Date: ${new Date()}`);
-            console.log(`Start Date: ${startDate}`);
+            // console.error("Start date is in the future");
+            // console.log(`Current Date: ${new Date()}`);
+            // console.log(`Start Date: ${startDate}`);
             return;
         }
 
@@ -199,19 +199,19 @@ function updateProgressBar(machine, index) {
             const totalMilliseconds = endDate - startDate;
             const elapsedMilliseconds = now - startDate;
 
-            console.log(`Now: ${now}`);
-            console.log(`Total Milliseconds: ${totalMilliseconds}`);
-            console.log(`Elapsed Milliseconds: ${elapsedMilliseconds}`);
+            // console.log(`Now: ${now}`);
+            // console.log(`Total Milliseconds: ${totalMilliseconds}`);
+            // console.log(`Elapsed Milliseconds: ${elapsedMilliseconds}`);
 
             if (elapsedMilliseconds < 0) {
-                console.error("Elapsed time is negative");
+                // console.error("Elapsed time is negative");
                 clearInterval(interval);
                 return;
             }
 
             percentage = Math.min(100, (elapsedMilliseconds / totalMilliseconds) * 100);
 
-            console.log(`Percentage: ${percentage}%`);
+            // console.log(`Percentage: ${percentage}%`);
 
             const progressBar = document.querySelector(`#progress-bar-${index}`);
             const percentageText = document.querySelector(`#percentage-${index}`);
@@ -220,7 +220,7 @@ function updateProgressBar(machine, index) {
                 progressBar.style.width = `${percentage}%`;
                 percentageText.textContent = `${Math.round(percentage)}%`;
             } else {
-                console.error(`Progress bar or percentage text not found for index ${index}`);
+                // console.error(`Progress bar or percentage text not found for index ${index}`);
                 clearInterval(interval);
                 return;
             }
@@ -242,7 +242,7 @@ function updateProgressBar(machine, index) {
             progressBar.style.width = '0%';
             percentageText.textContent = '0%';
         } else {
-            console.error(`Progress bar or percentage text not found for index ${index}`);
+            // console.error(`Progress bar or percentage text not found for index ${index}`);
         }
     }
 }
@@ -260,7 +260,7 @@ function updateTimeRemaining(machine, index) {
         const timeRemaining = (endDate - now) / 1000;
 
         if (timeRemaining <= 600) {
-            console.log(`Adding blinking class to card ${index}`);
+            // console.log(`Adding blinking class to card ${index}`);
             document.querySelector(`#card-id-${index}`).classList.add('blinking');
         }
 
