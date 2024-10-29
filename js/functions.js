@@ -64,7 +64,7 @@ function calculateInitialDateTime(machine, status) {
 }
 
 function calculateEndDate(machine, status, startDate) {
-    if (status == "Disponibile" || status=="In manutenzione"){
+    if (status == "Disponibile" || status=="In manutenzione" || startDate == null){
         return null;
     }else{
         return new Date(startDate.getTime() + machine.avgTime * 1000);
@@ -188,46 +188,45 @@ function createCard(machine, index) {
 }
 
 function updateProgressBar(machine, index) {
+    console.log("Update progressbar numb:" ,index);
+    
     const status = setCipStatus(machine);
     let percentage = 0;
+    const startDate = calculateInitialDateTime(machine,status);
+    const endDate = calculateEndDate(machine,status,startDate);
 
-    if (status === "Disponibile" || status === "In manutenzione") {
+    const progressBar = document.querySelector(`#progress-bar-${index}`);
+    const percentageText = document.querySelector(`#percentage-${index}`);
+
+    if (status === "Disponibile" || status === "In manutenzione"||startDate == null || endDate == null) {
         percentage = 0;
     } else {
-        const startDate = calculateInitialDateTime(machine,status);
-        const endDate = calculateEndDate(machine,status,startDate);
-
-
+    
         const interval = setInterval(() => {
             const now = new Date();
-            const totalMilliseconds = endDate.getTime() - startDate.getTime();
-            const elapsedMilliseconds = now.getTime() - startDate.getTime();
-            console.log(totalMilliseconds,elapsedMilliseconds);
+            const totalMilliseconds = endDate - startDate;
+            const elapsedMilliseconds = now - startDate;
+            console.log("total milli seconds",totalMilliseconds,"elapsed milli seconds",elapsedMilliseconds);
 
             if (elapsedMilliseconds < 0) {
                 clearInterval(interval);
                 console.log("Tempo negativo");
-                return;
-            }
-
-            percentage = Math.min(100, (elapsedMilliseconds / totalMilliseconds) * 100);
-
-            const progressBar = document.querySelector(`#progress-bar-${index}`);
-            const percentageText = document.querySelector(`#percentage-${index}`);
-
-            if (progressBar && percentageText) {
+                
+            }else{
+                percentage = Math.min(100, (elapsedMilliseconds / totalMilliseconds) * 100);
+                console.log("percentuale", percentage);
+            
                 progressBar.style.width = `${percentage}%`;
                 percentageText.textContent = `${Math.round(percentage)}%`;
-            } else {
-                clearInterval(interval);
-                return;
+
+                if (percentage >= 100) {
+                    clearInterval(interval);
+                    progressBar.style.width = '100%';
+                    percentageText.textContent = '100%';
+                }
             }
 
-            if (percentage >= 100) {
-                clearInterval(interval);
-                progressBar.style.width = '100%';
-                percentageText.textContent = '100%';
-            }
+            
         }, 1000);
     }
 
