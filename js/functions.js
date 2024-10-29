@@ -4,8 +4,11 @@ const cardContainerDetail = document.getElementById('card-container-detail');
 // let formattedDate, startHours, startMinutes, date;
 
 //Setter
+function setCipName(machine){
+    return  machine.name.split('_').slice(3, 4)[0].split('%')[0];
+}
 
-function setStatus(machine) {
+function setCipStatus(machine) {
     let status;
     if (machine.value != ""){
         status = "Occupato";
@@ -38,6 +41,9 @@ function setCardBackground(status) {
     return bgcolor;
 }
 
+function setEquip(machine){
+    return machine.value.split('_')[0];
+}
 
 function setStepTime(machine){
     if(machine.step.timeRemaining == 0){
@@ -51,7 +57,7 @@ function setStepTime(machine){
 
 function calculateInitialDateTime(machine, status) {
     if (status == "Disponibile" || status=="In manutenzione"){
-        return "N/A";
+        return null;
     } else {
         return new Date(machine.timeStamp);
     }
@@ -59,7 +65,7 @@ function calculateInitialDateTime(machine, status) {
 
 function calculateEndDate(machine, status, startDate) {
     if (status == "Disponibile" || status=="In manutenzione"){
-        return "N/A";
+        return null;
     }else{
         return new Date(startDate.getTime() + machine.avgTime * 1000);
     }
@@ -67,7 +73,7 @@ function calculateEndDate(machine, status, startDate) {
 
 function formatDateTime(date) {
     let Hours,Minutes,formattedDate;
-    if (date == "N/A"){
+    if (date == null){
         Hours = "N/A";
         Minutes = "N/A";
         formattedDate ="N/A";
@@ -97,7 +103,7 @@ function formatDateTime(date) {
 // }
 
 function calculateTimeRemaining(startDate, endDate) {
-    if (endDate == "N/A"){
+    if (endDate == null){
         const hours = "N/A";
         const minutes = "N/A";
         const seconds = "N/A";
@@ -115,12 +121,15 @@ function calculateTimeRemaining(startDate, endDate) {
 
 
 function createCard(machine, index) {
-    const title = machine.name.split('_').slice(3, 4)[0].split('%')[0];
-    const status = setStatus(machine);
+    const title = setCipName(machine);
+    const status = setCipStatus(machine);
     const cardBackgroundClass = setCardBackground(status);
     const startDate = calculateInitialDateTime(machine, status);
     const endDate = calculateEndDate(machine, status, startDate);
-    const equipment = machine.value.split('_')[0];
+
+    console.log("Data inizio:",startDate,"Data fine:",endDate);
+
+    const equipment = setEquip(machine);
     
     
     const { formattedDate: formattedStartDate, Hours: startHours, Minutes: startMinutes } = formatDateTime(startDate);
@@ -168,7 +177,8 @@ function createCard(machine, index) {
 
                 <div class="my-2">
                     <span class="fw-bold">Step di processo in corso:</span> 
-                    <span>N/A</span>
+                    <span>${machine.step.name ? machine.step.name : "N/A"}</span>
+
                 </div>
                 
                 <button class="btn btn-danger mt-2" onclick="showDetails()">Dettagli <span><i class="fa-solid fa-info m-1"></i></span></button>
@@ -178,14 +188,14 @@ function createCard(machine, index) {
 }
 
 function updateProgressBar(machine, index) {
-    const status = setStatus(machine);
+    const status = setCipStatus(machine);
     let percentage = 0;
 
     if (status === "Disponibile" || status === "In manutenzione") {
         percentage = 0;
     } else {
-        const startDate = calculateInitialDateTime(machine);
-        const endDate = calculateEndDate(machine);
+        const startDate = calculateInitialDateTime(machine,status);
+        const endDate = calculateEndDate(machine,status,startDate);
 
 
         const interval = setInterval(() => {
@@ -236,7 +246,7 @@ function updateProgressBar(machine, index) {
 function updateTimeRemaining(machine, index) {
     const startDate = new Date(machine.timeStamp);
     const endDate = new Date(startDate.getTime() + parseInt(machine.avgTime, 10) * 1000);
-    const status = setStatus(machine);
+    const status = setCipStatus(machine);
 
     if (status === "Disponibile" || status === "In manutenzione") {
         const hours = 0;
