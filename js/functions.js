@@ -1,9 +1,7 @@
-const cardContainer = document.getElementById("card-container");
-const cardContainerDetail = document.getElementById('card-container-detail');
 
-// let formattedDate, startHours, startMinutes, date;
+//__________________SETTER________________________
 
-//Setter
+
 function setCipName(machine){
     return  machine.name.split('_').slice(3, 4)[0].split('%')[0];
 }
@@ -53,7 +51,11 @@ function setStepTime(machine){
     }
 }
 
-///////
+//__________________!SETTER________________________
+
+
+//__________________CALCULATOR________________________
+
 
 function calculateInitialDateTime(machine, status) {
     if (status == "Disponibile" || status=="In manutenzione"){
@@ -86,21 +88,6 @@ function formatDateTime(date) {
 }
 
 
-// function formatEndDate(endDate) {
-    
-//     if(endDate == "N/A"){
-//         const formattedEndDate = "N/A";
-//         const endHours = "N/A";
-//         const endMinutes = "N/A";
-//         return { formattedEndDate, formattedEndTime: `${endHours}:${endMinutes}` };
-//     }else{
-//         const formattedEndDate = endDate.toLocaleDateString('it-IT');
-//         const endHours = endDate.getHours().toString().padStart(2, '0');
-//         const endMinutes = endDate.getMinutes().toString().padStart(2, '0');
-//         return { formattedEndDate, formattedEndTime: `${endHours}:${endMinutes}` };
-//     }
-    
-// }
 
 function calculateTimeRemaining(startDate, endDate) {
     if (endDate == null){
@@ -119,6 +106,9 @@ function calculateTimeRemaining(startDate, endDate) {
     
 }
 
+//__________________!CALCULATOR________________________
+
+//__________________CREATOR________________________
 
 function createCard(machine, index) {
     const title = setCipName(machine);
@@ -187,6 +177,23 @@ function createCard(machine, index) {
     `;
 }
 
+
+function generateCards(machines) {
+    return machines.map((machine, index) => {
+        const cardHTML = createCard(machine, index);
+        setTimeout(() => {
+            updateTimeRemaining(machine, index);
+            updateProgressBar(machine, index);
+        }, 0);
+        return cardHTML;
+    }).join('');
+}
+
+//__________________!CREATOR________________________
+
+
+//__________________UPDATE________________________
+
 function updateProgressBar(machine, index) {
     console.log("Update progressbar numb:" ,index);
     
@@ -223,6 +230,10 @@ function updateProgressBar(machine, index) {
                     clearInterval(interval);
                     progressBar.style.width = '100%';
                     percentageText.textContent = '100%';
+                    //TODO: impostare un settimeout che ripristina lo stato della card a disponibile dopo due secondi
+                    // const timeoutId = setTimeout(() => {
+                    //     console.log("Questo messaggio appare dopo 2 secondi");
+                    // }, 2000);
                 }
             }
 
@@ -261,6 +272,7 @@ function updateTimeRemaining(machine, index) {
             
             const timeRemaining = (endDate - now) / 1000;
 
+            //TODO:
             // if (timeRemaining <= 600) {
             //     // console.log(`Adding blinking class to card ${index}`);
             //     document.querySelector(`#card-id-${index}`).classList.add('blinking');
@@ -275,18 +287,9 @@ function updateTimeRemaining(machine, index) {
 
 }
 
-function generateCards(machines) {
-    return machines.map((machine, index) => {
-        const cardHTML = createCard(machine, index);
-        setTimeout(() => {
-            updateTimeRemaining(machine, index);
-            updateProgressBar(machine, index);
-        }, 0);
-        return cardHTML;
-    }).join('');
-}
 
-//UTILS
+//__________________UTILS________________________
+
 function showDetails() {
     cardContainer.style.display = 'none';
     cardContainerDetail.style.display = 'block';
@@ -298,7 +301,8 @@ function goBack() {
 }
 
 
-//DOM
+//__________________DOM CONTROL________________________
+
 document.addEventListener('DOMContentLoaded', function() {
     const cardContainer = document.getElementById("card-container");
 
