@@ -1,4 +1,5 @@
 
+
 //__________________SETTER________________________
 
 
@@ -227,13 +228,16 @@ function updateProgressBar(machine, index) {
                 percentageText.textContent = `${Math.round(percentage)}%`;
 
                 if (percentage >= 100) {
+                    console.log("dentro if >100");
+                    
                     clearInterval(interval);
                     progressBar.style.width = '100%';
                     percentageText.textContent = '100%';
                     //TODO: impostare un settimeout che ripristina lo stato della card a disponibile dopo due secondi
-                    // const timeoutId = setTimeout(() => {
-                    //     console.log("Questo messaggio appare dopo 2 secondi");
-                    // }, 2000);
+                    const timeoutId = setTimeout(() => {
+                        
+                        resetCard(index);
+                    }, 2000);
                 }
             }
 
@@ -301,10 +305,35 @@ function goBack() {
 }
 
 
-//__________________DOM CONTROL________________________
+function resetCard(index) {
 
-document.addEventListener('DOMContentLoaded', function() {
-    const cardContainer = document.getElementById("card-container");
+    console.log(`Reset ${index} lanciato`);
+    
+    // Aggiorna l'array machines
+    machines[index].value = "";
+    machines[index].maintenance = 0;
+    machines[index].step.name = "";
+    machines[index].step.timeRemaining = 0;
 
-    cardContainer.innerHTML = generateCards(machines);
-});
+    // Aggiorna il DOM
+    const progressBar = document.querySelector(`#progress-bar-${index}`);
+    const percentageText = document.querySelector(`#percentage-${index}`);
+    const statusElement = document.querySelector(`#status-${index}`);
+    const countdownElement = document.querySelector(`#countdown-${index}`);
+
+    if (progressBar && percentageText) {
+        progressBar.style.width = '0%';
+        percentageText.textContent = '0%';
+    }
+
+    if (statusElement) {
+        statusElement.textContent = 'Disponibile';
+    }
+
+    if (countdownElement) {
+        countdownElement.textContent = '0h 0m 0s';
+    }
+
+    generateCards(machines);
+    console.log(`Card ${index} reset to available`);
+}
