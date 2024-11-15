@@ -118,7 +118,7 @@ function createCard(machine, index) {
     const startDate = calculateInitialDateTime(machine, status);
     const endDate = calculateEndDate(machine, status, startDate);
 
-    console.log("Data inizio:",startDate,"Data fine:",endDate);
+    // console.log("Data inizio:",startDate,"Data fine:",endDate);
 
     const equipment = setEquip(machine);
     
@@ -196,12 +196,14 @@ function generateCards(machines) {
 //__________________UPDATE________________________
 
 function updateProgressBar(machine, index) {
-    console.log("Update progressbar numb:" ,index);
+    // console.log("Update progressbar numb:" ,index);
     
     const status = setCipStatus(machine);
     let percentage = 0;
     const startDate = calculateInitialDateTime(machine,status);
     const endDate = calculateEndDate(machine,status,startDate);
+
+    console.log("Carta n:",index,"Data inizio:",startDate,"Data fine:",endDate);    
 
     const progressBar = document.querySelector(`#progress-bar-${index}`);
     const percentageText = document.querySelector(`#percentage-${index}`);
